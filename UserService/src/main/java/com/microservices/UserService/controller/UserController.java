@@ -1,35 +1,43 @@
 package com.microservices.UserService.controller;
 
+import com.microservices.UserService.dto.UserResponse;
 import com.microservices.UserService.entity.User;
 import com.microservices.UserService.service.UserService;
+import com.microservices.UserService.service.UserServiceImplementation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
+    private final UserServiceImplementation userServiceImplementation;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserServiceImplementation userServiceImplementation) {
         this.userService = userService;
+        this.userServiceImplementation = userServiceImplementation;
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUser());
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUser().stream()
+                .map(userServiceImplementation::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        // If user not found, service will throw ResourceNotFoundException
+        // GlobalExceptionHandler will catch it and return 404
         User user = userService.getUserById(id);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
+        UserResponse response = userServiceImplementation.mapToResponse(user);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/{id}/exists")
@@ -38,26 +46,25 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<UserResponse> createUser(@RequestBody User user) {
         User savedUser = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        UserResponse response = userServiceImplementation.mapToResponse(savedUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody User user) {
+        // If user not found, service will throw ResourceNotFoundException
         User updatedUser = userService.updateUser(id, user);
-        if (updatedUser == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(updatedUser);
+        UserResponse response = userServiceImplementation.mapToResponse(updatedUser);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
-        if (!deleted) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+        // If user not found, service will throw ResourceNotFoundException
+        // GlobalExceptionHandler will catch it and return 404
+        userService.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

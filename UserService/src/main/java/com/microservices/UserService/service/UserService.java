@@ -1,5 +1,6 @@
 package com.microservices.UserService.service;
 
+import com.microservices.UserService.dto.UserResponse;
 import com.microservices.UserService.entity.User;
 
 import java.util.List;
@@ -16,5 +17,7 @@ public interface UserService {
 
     User updateUser(Long id, User updatedUser);
 
-    boolean deleteUser(Long id);
+    void deleteUser(Long id);
+
+    public UserResponse mapToResponse(User user);
 }

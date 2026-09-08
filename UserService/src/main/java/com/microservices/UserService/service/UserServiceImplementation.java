@@ -1,6 +1,8 @@
 package com.microservices.UserService.service;
 
+import com.microservices.UserService.dto.UserResponse;
 import com.microservices.UserService.entity.User;
+import com.microservices.UserService.exception.ResourceNotFoundException;
 import com.microservices.UserService.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,8 @@ public class UserServiceImplementation implements UserService{
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
 
     public boolean existById(Long id) {
@@ -39,14 +42,25 @@ public class UserServiceImplementation implements UserService{
                     existingUser.setAddress(updatedUser.getAddress());
                     return userRepository.save(existingUser);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
 
-    public boolean deleteUser(Long id) {
+    public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            return false;
+            throw new ResourceNotFoundException("User with id " + id + " not found");
         }
         userRepository.deleteById(id);
-        return true;
+    }
+
+    public UserResponse mapToResponse(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserResponse(
+            user.getId(),
+            user.getName(),
+            user.getPhoneNo(),
+            user.getAddress()
+        );
     }
 }
