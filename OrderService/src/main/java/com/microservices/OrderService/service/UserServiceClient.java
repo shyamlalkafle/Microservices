@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Duration;
+
 @Component
 public class UserServiceClient {
 
@@ -16,11 +18,16 @@ public class UserServiceClient {
     }
 
     public boolean userExists(Long userId) {
-        Boolean exists = webClient.get()
-                .uri("/api/users/{id}/exists", userId)
-                .retrieve()
-                .bodyToMono(Boolean.class)
-                .block();
-        return Boolean.TRUE.equals(exists);
+        try {
+            Boolean exists = webClient.get()
+                    .uri("/api/users/{id}/exists", userId)
+                    .retrieve()
+                    .bodyToMono(Boolean.class)
+                    .timeout(Duration.ofSeconds(5))
+                    .block();
+            return Boolean.TRUE.equals(exists);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not verify user with User Service: " + e.getMessage(), e);
+        }
     }
 }

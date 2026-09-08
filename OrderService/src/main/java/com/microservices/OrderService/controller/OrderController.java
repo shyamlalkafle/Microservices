@@ -1,5 +1,6 @@
 package com.microservices.OrderService.controller;
 
+import com.microservices.OrderService.dto.OrderResponse;
 import com.microservices.OrderService.entity.Order;
 import com.microservices.OrderService.service.OrderService;
 import org.springframework.http.HttpStatus;
@@ -19,35 +20,28 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        List<OrderResponse> orders = orderService.getAllOrders();
+        return ResponseEntity.status(HttpStatus.OK).body(orders);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
-        Order order = orderService.getOrderById(id);
-        if (order == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(order);
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        OrderResponse order = orderService.getOrderById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(order);
     }
 
     @PostMapping
-    public ResponseEntity<?> createOrder(@RequestBody Order order) {
-        try {
-            Order savedOrder = orderService.createOrder(order);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody Order order) {
+        OrderResponse savedOrder = orderService.createOrder(order);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        boolean deleted = orderService.deleteOrder(id);
-        if (!deleted) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+        // If order not found, service will throw ResourceNotFoundException
+        // GlobalExceptionHandler will catch it and return 404
+        orderService.deleteOrder(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
