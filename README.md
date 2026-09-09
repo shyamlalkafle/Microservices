@@ -56,14 +56,6 @@ cd OrderService
 ```
 **Runs on:** http://localhost:8080
 
-### Quick Test
-```powershell
-# Create a user
-curl -X POST http://localhost:8090/api/users -H "Content-Type: application/json" -d '{\"name\": \"John Doe\", \"phoneNo\": \"1234567890\", \"address\": \"123 Main St\"}'
-
-# Create an order
-curl -X POST http://localhost:8080/api/orders -H "Content-Type: application/json" -d '{\"userId\": 1, \"productName\": \"Laptop\", \"quantity\": 2, \"totalPrice\": 2000.00}'
-```
 
 ## 📁 Project Structure
 
@@ -74,6 +66,7 @@ Microservices/
 │   │   ├── controller/          # REST endpoints
 │   │   ├── dto/                 # UserResponse DTO
 │   │   ├── entity/              # User entity
+│   │   ├── exception/           # Custom exceptions & global handler
 │   │   ├── repository/          # JPA repository
 │   │   ├── service/             # Business logic
 │   │   └── UserServiceApplication.java
@@ -93,21 +86,8 @@ Microservices/
 │   └── src/main/resources/
 │       └── application.yaml     # Configuration
 │
-├── ARCHITECTURE.md              # Architecture diagrams & patterns
-├── IMPLEMENTATION_SUMMARY.md    # Detailed implementation guide
-├── TESTING_GUIDE.md             # Comprehensive testing scenarios
-├── QUICK_START.md               # Fast setup guide
 └── README.md                    # This file
 ```
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, diagrams, design patterns |
-| [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) | Step-by-step implementation details & rationale |
-| [TESTING_GUIDE.md](TESTING_GUIDE.md) | Complete testing scenarios including failure cases |
-| [QUICK_START.md](QUICK_START.md) | Quick setup and basic commands |
 
 ## 🎯 Key Features
 
@@ -152,14 +132,6 @@ Follow the [TESTING_GUIDE.md](TESTING_GUIDE.md) to test:
 - User not found scenario
 - Service unavailable scenario
 - Configuration externalization
-
-### Test Service Resilience
-```powershell
-# Stop UserService (Ctrl+C), then try to create an order
-curl -X POST http://localhost:8080/api/orders -H "Content-Type: application/json" -d '{\"userId\": 1, \"productName\": \"Phone\", \"quantity\": 1, \"totalPrice\": 500.00}'
-
-# Should return 503 Service Unavailable with clear message
-```
 
 ## 🏗 Architecture Highlights
 
@@ -208,27 +180,3 @@ curl -X POST http://localhost:8080/api/orders -H "Content-Type: application/json
 | 502 | Bad Gateway | Downstream service returned error |
 | 503 | Service Unavailable | Downstream service is down |
 
-## 🔮 Future Enhancements
-
-- [ ] Add Eureka for service discovery
-- [ ] Add Spring Cloud Gateway as API Gateway
-- [ ] Implement Resilience4j circuit breaker
-- [ ] Add distributed tracing (Sleuth + Zipkin)
-- [ ] Implement Spring Cloud Config Server
-- [ ] Add authentication (Spring Security + JWT)
-- [ ] Replace H2 with PostgreSQL
-- [ ] Add Docker support
-- [ ] Add Swagger/OpenAPI documentation
-- [ ] Add integration tests
-
-## 📝 License
-
-This is a learning project demonstrating microservices architecture patterns.
-
-## 👤 Author
-
-Shyamlal Kafle
-
----
-
-**Ready to explore?** Start with [QUICK_START.md](QUICK_START.md) or dive deep into [ARCHITECTURE.md](ARCHITECTURE.md)!
