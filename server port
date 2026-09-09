@@ -1,0 +1,8 @@
+server url
+
+order-service -> user-service.base-url -> http://localhost:8081
+api-gateway -> user-service-route uri -> http://localhost:8081
+api-gateway -> order-service-route uri -> http://localhost:8082
+user-service -> server.port -> 8081
+order-service -> server.port -> 8082
+api-gateway -> server.port -> 8080

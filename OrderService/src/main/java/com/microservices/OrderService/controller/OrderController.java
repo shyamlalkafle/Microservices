@@ -38,10 +38,14 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        // If order not found, service will throw ResourceNotFoundException
-        // GlobalExceptionHandler will catch it and return 404
+    public ResponseEntity<?> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Order with order id "+id+" deleted successfully");
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<OrderResponse>> getOrderByUserId(Long id){
+        List<OrderResponse> orderList = orderService.getOrderByUserId(id);
+        return ResponseEntity.status(HttpStatus.OK).body(orderList);
     }
 }

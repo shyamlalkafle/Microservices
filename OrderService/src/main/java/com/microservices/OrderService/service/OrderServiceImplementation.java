@@ -22,12 +22,14 @@ public class OrderServiceImplementation implements OrderService {
         this.userServiceClient = userServiceClient;
     }
 
+    @Override
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public OrderResponse getOrderById(Long id) {
         Order order = orderRepository
                 .findById(id)
@@ -35,6 +37,7 @@ public class OrderServiceImplementation implements OrderService {
         return mapToResponse(order);
     }
 
+    @Override
     public OrderResponse createOrder(Order order) {
         if (!userServiceClient.userExists(order.getUserId())) {
             throw new UserNotFoundException("User with id " + order.getUserId() + " does not exist");
@@ -44,11 +47,20 @@ public class OrderServiceImplementation implements OrderService {
         return mapToResponse(savedOrder);
     }
 
+    @Override
     public void deleteOrder(Long id) {
         if (!orderRepository.existsById(id)) {
             throw new OrderNotFoundException("Order with id " + id + " not found");
         }
         orderRepository.deleteById(id);
+    }
+
+    @Override
+    public List<OrderResponse> getOrderByUserId(Long id){
+        List<Order> orders = orderRepository.findByUserId(id);
+        return orders.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     private OrderResponse mapToResponse(Order order) {

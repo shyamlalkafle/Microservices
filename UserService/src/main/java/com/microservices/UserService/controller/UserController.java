@@ -61,10 +61,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        // If user not found, service will throw ResourceNotFoundException
-        // GlobalExceptionHandler will catch it and return 404
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User with user id "+id+" deleted successfully");
     }
 }
