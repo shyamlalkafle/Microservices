@@ -131,10 +131,6 @@ Microservices/
 │   └── src/main/resources/
 │       └── application.yaml     # Configuration
 │
-├── ARCHITECTURE.md              # Architecture diagrams & patterns
-├── IMPLEMENTATION_SUMMARY.md    # Detailed implementation guide
-├── TESTING_GUIDE.md             # Comprehensive testing scenarios
-├── QUICK_START.md               # Fast setup guide
 └── README.md                    # This file
 ```
 
