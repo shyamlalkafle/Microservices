@@ -1,8 +1,17 @@
-server url
+// Gateway routing (client-facing)
 
-order-service -> user-service.base-url -> http://localhost:8081
-api-gateway -> user-service-route uri -> http://localhost:8081
-api-gateway -> order-service-route uri -> http://localhost:8082
-user-service -> server.port -> 8081
-order-service -> server.port -> 8082
-api-gateway -> server.port -> 8080
+                        ┌─ > user-service-route    uri -> http://localhost:8081
+client ── api-gateway ──┼─ > order-service-route   uri -> http://localhost:8082
+                        │─ > payment-service-route uri -> http://localhost:8083
+                        └─ > catch-all-fallback     uri -> http://localhost:9999 (always fails, triggers generic fallback)
+
+// Internal service-to-service calls (bypass gateway)
+order-service   -> user-service.base-url    -> http://localhost:8081   (check user exists)
+order-service   -> payment-service.base-url -> http://localhost:8083   (trigger payment)
+payment-service -> user-service.base-url    -> http://localhost:8081   (deduct balance)
+
+// Each server's own port
+api-gateway     -> server.port -> 8080
+user-service    -> server.port -> 8081
+order-service   -> server.port -> 8082
+payment-service -> server.port -> 8083
