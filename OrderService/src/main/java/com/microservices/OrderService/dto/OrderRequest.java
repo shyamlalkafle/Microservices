@@ -1,4 +1,4 @@
-package com.microservices.OrderService.entity;
+package com.microservices.OrderService.dto;
 
 import com.microservices.OrderService.enums.OrderStatus;
 import jakarta.persistence.*;
@@ -12,13 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "orders")
-public class Order {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class OrderRequest {
 
     private Long userId;
 
@@ -28,14 +22,5 @@ public class Order {
 
     private BigDecimal amount;
 
-    @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
-
-    private LocalDateTime orderDate;
-
-    @PrePersist
-    void doActivity(){
-        this.orderDate = LocalDateTime.now();
-    }
 
 }

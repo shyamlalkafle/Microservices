@@ -1,5 +1,6 @@
 package com.microservices.OrderService.controller;
 
+import com.microservices.OrderService.dto.OrderRequest;
 import com.microservices.OrderService.dto.OrderResponse;
 import com.microservices.OrderService.entity.Order;
 import com.microservices.OrderService.service.OrderService;
@@ -32,7 +33,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody Order order) {
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest order) {
         OrderResponse savedOrder = orderService.createOrder(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }

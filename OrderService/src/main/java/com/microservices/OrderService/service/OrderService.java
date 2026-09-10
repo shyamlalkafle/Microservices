@@ -1,5 +1,6 @@
 package com.microservices.OrderService.service;
 
+import com.microservices.OrderService.dto.OrderRequest;
 import com.microservices.OrderService.dto.OrderResponse;
 import com.microservices.OrderService.entity.Order;
 
@@ -11,7 +12,7 @@ public interface OrderService {
 
     OrderResponse getOrderById(Long id);
 
-    OrderResponse createOrder(Order order);
+    OrderResponse createOrder(OrderRequest order);
 
     void deleteOrder(Long id);
 

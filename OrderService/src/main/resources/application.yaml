@@ -23,3 +23,6 @@ server:
 
 user-service:
   base-url: http://localhost:8081
+
+payment-service:
+  base-url: http://localhost:8083

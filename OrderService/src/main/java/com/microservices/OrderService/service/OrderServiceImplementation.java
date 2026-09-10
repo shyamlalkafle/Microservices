@@ -1,7 +1,9 @@
 package com.microservices.OrderService.service;
 
+import com.microservices.OrderService.dto.OrderRequest;
 import com.microservices.OrderService.dto.OrderResponse;
 import com.microservices.OrderService.entity.Order;
+import com.microservices.OrderService.enums.OrderStatus;
 import com.microservices.OrderService.exception.OrderNotFoundException;
 import com.microservices.OrderService.exception.UserNotFoundException;
 import com.microservices.OrderService.repository.OrderRepository;
@@ -16,10 +18,12 @@ public class OrderServiceImplementation implements OrderService {
 
     private final OrderRepository orderRepository;
     private final UserServiceClient userServiceClient;
+    private final PaymentServiceClient paymentServiceClient;
 
-    public OrderServiceImplementation(OrderRepository orderRepository, UserServiceClient userServiceClient) {
+    public OrderServiceImplementation(OrderRepository orderRepository, UserServiceClient userServiceClient, PaymentServiceClient paymentServiceClient) {
         this.orderRepository = orderRepository;
         this.userServiceClient = userServiceClient;
+        this.paymentServiceClient = paymentServiceClient;
     }
 
     @Override
@@ -38,13 +42,19 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
-    public OrderResponse createOrder(Order order) {
-        if (!userServiceClient.userExists(order.getUserId())) {
-            throw new UserNotFoundException("User with id " + order.getUserId() + " does not exist");
+    public OrderResponse createOrder(OrderRequest requestOrder) {
+        if (!userServiceClient.userExists(requestOrder.getUserId())) {
+            throw new UserNotFoundException("User with id " + requestOrder.getUserId() + " does not exist");
         }
-        order.setOrderDate(LocalDateTime.now());
+        Order order = mapToEntity(requestOrder);
         Order savedOrder = orderRepository.save(order);
-        return mapToResponse(savedOrder);
+
+        boolean paymentSuccess = paymentServiceClient.processPayment(
+                savedOrder.getId(), savedOrder.getUserId(), savedOrder.getAmount()
+        );
+
+        savedOrder.setOrderStatus(paymentSuccess ? OrderStatus.CONFIRMED : OrderStatus.FAILED);
+        return mapToResponse(orderRepository.save(savedOrder));
     }
 
     @Override
@@ -72,8 +82,25 @@ public class OrderServiceImplementation implements OrderService {
                 order.getUserId(),
                 order.getProductName(),
                 order.getQuantity(),
-                order.getTotalPrice(),
+                order.getAmount(),
+                order.getOrderStatus(),
                 order.getOrderDate()
         );
+    }
+
+    private Order mapToEntity(OrderRequest orderRequest) {
+        if (orderRequest == null) {
+            return null;
+        }
+        Order order = new Order();
+
+        order.setUserId(orderRequest.getUserId());
+        order.setProductName(orderRequest.getProductName());
+        order.setQuantity(orderRequest.getQuantity());
+        order.setAmount(orderRequest.getAmount());
+        order.setOrderStatus(OrderStatus.PENDING);
+        order.setOrderDate(LocalDateTime.now());
+
+        return order;
     }
 }
