@@ -15,7 +15,19 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
+                "Resource Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentExceptionException(
+            IllegalArgumentException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Illegal Argument Exception",
                 ex.getMessage(),
                 request.getRequestURI()
         );

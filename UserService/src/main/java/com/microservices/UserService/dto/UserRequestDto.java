@@ -9,10 +9,11 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
-    private Long id;
+public class UserRequestDto {
     private String name;
+
     private String phoneNo;
+
     private String address;
-    private BigDecimal balance;
+
 }

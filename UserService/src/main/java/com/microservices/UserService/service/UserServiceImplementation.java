@@ -1,11 +1,14 @@
 package com.microservices.UserService.service;
 
+import com.microservices.UserService.dto.UserRequestDto;
 import com.microservices.UserService.dto.UserResponse;
 import com.microservices.UserService.entity.User;
 import com.microservices.UserService.exception.ResourceNotFoundException;
 import com.microservices.UserService.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -30,11 +33,11 @@ public class UserServiceImplementation implements UserService{
         return userRepository.existsById(id);
     }
 
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public User createUser(UserRequestDto user) {
+        return userRepository.save(mapToEntity(user));
     }
 
-    public User updateUser(Long id, User updatedUser) {
+    public User updateUser(Long id, UserRequestDto updatedUser) {
         return userRepository.findById(id)
                 .map(existingUser -> {
                     existingUser.setName(updatedUser.getName());
@@ -57,10 +60,45 @@ public class UserServiceImplementation implements UserService{
             return null;
         }
         return new UserResponse(
-            user.getId(),
-            user.getName(),
-            user.getPhoneNo(),
-            user.getAddress()
+                user.getId(),
+                user.getName(),
+                user.getPhoneNo(),
+                user.getAddress(),
+                user.getBalance()
         );
+    }
+
+    private User mapToEntity(UserRequestDto requestDto){
+        if (requestDto == null) {
+            return null;
+        }
+        User user = new User();
+        user.setName(requestDto.getName());
+        user.setPhoneNo(requestDto.getPhoneNo());
+        user.setAddress(requestDto.getAddress());
+        user.setBalance(BigDecimal.ZERO);
+        return user;
+    }
+
+    @Transactional
+    public boolean deductBalanceIfSufficient(Long userId, BigDecimal amount) {
+        User user = getUserById(userId);
+
+        if (user.getBalance().compareTo(amount) >= 0) {
+            user.setBalance(user.getBalance().subtract(amount));
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public User addToBalance(Long userId, BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        User user = getUserById(userId);
+        user.setBalance(user.getBalance().add(amount));
+        return userRepository.save(user);
     }
 }

@@ -1,5 +1,7 @@
 package com.microservices.UserService.controller;
 
+import com.microservices.UserService.dto.AmountRequest;
+import com.microservices.UserService.dto.UserRequestDto;
 import com.microservices.UserService.dto.UserResponse;
 import com.microservices.UserService.entity.User;
 import com.microservices.UserService.service.UserService;
@@ -8,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +36,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        // If user not found, service will throw ResourceNotFoundException
-        // GlobalExceptionHandler will catch it and return 404
         User user = userService.getUserById(id);
         UserResponse response = userServiceImplementation.mapToResponse(user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -46,15 +47,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody User user) {
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequestDto user) {
         User savedUser = userService.createUser(user);
         UserResponse response = userServiceImplementation.mapToResponse(savedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody User user) {
-        // If user not found, service will throw ResourceNotFoundException
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserRequestDto user) {
         User updatedUser = userService.updateUser(id, user);
         UserResponse response = userServiceImplementation.mapToResponse(updatedUser);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -63,6 +63,20 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User with user id "+id+" deleted successfully");
+        return ResponseEntity.ok("User with user id "+id+" deleted successfully");
+    }
+
+    @PatchMapping("/{id}/deduct")
+    public ResponseEntity<Boolean> deductBalance(@PathVariable Long id, @RequestParam BigDecimal amount) {
+        boolean success = userService.deductBalanceIfSufficient(id, amount);
+        return ResponseEntity.ok(success);
+    }
+
+    @PostMapping("/{id}/balance/add")
+    public ResponseEntity<User> addBalance(
+            @PathVariable Long id,
+            @RequestBody AmountRequest request) {
+        User updated = userService.addToBalance(id, request.getAmount());
+        return ResponseEntity.ok(updated);
     }
 }
