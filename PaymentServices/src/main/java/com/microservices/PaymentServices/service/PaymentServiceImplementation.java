@@ -1,9 +1,11 @@
 package com.microservices.PaymentServices.service;
 
+import com.microservices.PaymentServices.client.UserServiceClient;
 import com.microservices.PaymentServices.dto.PaymentRequest;
 import com.microservices.PaymentServices.dto.PaymentResponse;
 import com.microservices.PaymentServices.entity.Payment;
 import com.microservices.PaymentServices.enums.PaymentStatus;
+import com.microservices.PaymentServices.exception.PaymentNotFoundException;
 import com.microservices.PaymentServices.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +31,13 @@ public class PaymentServiceImplementation implements PaymentService{
 
         payment = paymentRepository.save(payment);
 
-        boolean deducted = userServiceClient.deductBalance(request.getUserId(), request.getAmount());
+        boolean deducted = false;
+        try {
+            deducted = userServiceClient.deductBalance(request.getUserId(), request.getAmount());
+        } catch (Exception e) {
+            // Log the error but don't throw - we need to update payment status to FAILED
+            System.err.println("Failed to deduct balance: " + e.getMessage());
+        }
 
         payment.setPaymentStatus(deducted ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
         payment = paymentRepository.save(payment);
@@ -39,8 +47,9 @@ public class PaymentServiceImplementation implements PaymentService{
 
     @Override
     public PaymentResponse getPaymentById(Long id) {
-        Payment payment = paymentRepository.findById(id).orElse(null);
-        return payment != null ? toResponse(payment) : null;
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment with id " + id + " not found"));
+        return toResponse(payment);
     }
 
     @Override

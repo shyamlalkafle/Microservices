@@ -1,6 +1,6 @@
-package com.microservices.PaymentServices.service;
+package com.microservices.PaymentServices.client;
 
-import com.microservices.OrderService.exception.UserServiceUnavailableException;
+import com.microservices.PaymentServices.exception.UserServiceUnavailableException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
