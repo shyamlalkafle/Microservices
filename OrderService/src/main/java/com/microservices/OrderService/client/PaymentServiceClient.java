@@ -1,4 +1,4 @@
-package com.microservices.OrderService.service;
+package com.microservices.OrderService.client;
 
 import com.microservices.OrderService.dto.PaymentRequest;
 import com.microservices.OrderService.dto.PaymentResponse;

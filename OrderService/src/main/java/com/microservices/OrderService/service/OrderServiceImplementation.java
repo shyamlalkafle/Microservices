@@ -1,5 +1,7 @@
 package com.microservices.OrderService.service;
 
+import com.microservices.OrderService.client.PaymentServiceClient;
+import com.microservices.OrderService.client.UserServiceClient;
 import com.microservices.OrderService.dto.OrderRequest;
 import com.microservices.OrderService.dto.OrderResponse;
 import com.microservices.OrderService.entity.Order;
